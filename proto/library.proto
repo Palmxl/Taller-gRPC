@@ -1,0 +1,45 @@
+syntax = "proto3";
+package library;
+
+service LibraryService {
+  rpc LoanByIsbn (LoanByIsbnRequest) returns (LoanResponse);
+  rpc LoanByTitle (LoanByTitleRequest) returns (LoanResponse);
+  rpc QueryByIsbn (QueryByIsbnRequest) returns (QueryResponse);
+  rpc ReturnByIsbn (ReturnRequest) returns (ReturnResponse);
+}
+
+message LoanByIsbnRequest {
+  string isbn = 1;
+  string user_id = 2;
+}
+
+message LoanByTitleRequest {
+  string title = 1;
+  string user_id = 2;
+}
+
+message LoanResponse {
+  bool ok = 1;
+  string message = 2;
+  string due_date_iso = 3;
+}
+
+message QueryByIsbnRequest {
+  string isbn = 1;
+}
+
+message QueryResponse {
+  bool exists = 1;
+  int32 copies_available = 2;
+  string title = 3;
+}
+
+message ReturnRequest {
+  string isbn = 1;
+  string user_id = 2;
+}
+
+message ReturnResponse {
+  bool ok = 1;
+  string message = 2;
+}
