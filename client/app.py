@@ -2,7 +2,7 @@ import grpc
 from lib import library_pb2, library_pb2_grpc
 
 def main():
-    channel = grpc.insecure_channel("127.0.0.1:50051")
+    channel = grpc.insecure_channel("10.43.103.200:50051")
     stub = library_pb2_grpc.LibraryServiceStub(channel)
 
     while True:
