@@ -5,10 +5,12 @@ from datetime import date, timedelta
 from .dao import BookDao, BASE_DIR
 from lib import library_pb2, library_pb2_grpc
 
+# implementación del servicio definido en library.proto
 class LibraryService(library_pb2_grpc.LibraryServiceServicer):
     def __init__(self, dao: BookDao):
-        self.dao = dao
+        self.dao = dao  # acceso a la base de datos de libros
 
+    # préstamo de libro por ISBN
     def LoanByIsbn(self, request, context):
         book = self.dao.get_by_isbn(request.isbn)
         if not book:
@@ -19,6 +21,7 @@ class LibraryService(library_pb2_grpc.LibraryServiceServicer):
         due = (date.today() + timedelta(days=7)).isoformat()
         return library_pb2.LoanResponse(ok=True, message="Préstamo aprobado", due_date_iso=due)
 
+    # préstamo de libro por título
     def LoanByTitle(self, request, context):
         book = self.dao.get_first_by_title(request.title)
         if not book:
@@ -29,6 +32,7 @@ class LibraryService(library_pb2_grpc.LibraryServiceServicer):
         due = (date.today() + timedelta(days=7)).isoformat()
         return library_pb2.LoanResponse(ok=True, message="Préstamo aprobado", due_date_iso=due)
 
+    # consulta de disponibilidad por ISBN
     def QueryByIsbn(self, request, context):
         book = self.dao.get_by_isbn(request.isbn)
         if not book:
@@ -36,6 +40,7 @@ class LibraryService(library_pb2_grpc.LibraryServiceServicer):
         available = book.copies_total - book.copies_loaned
         return library_pb2.QueryResponse(exists=True, copies_available=available, title=book.title)
 
+    # devolución de libro por ISBN
     def ReturnByIsbn(self, request, context):
         book = self.dao.get_by_isbn(request.isbn)
         if not book:
@@ -45,13 +50,13 @@ class LibraryService(library_pb2_grpc.LibraryServiceServicer):
         self.dao.decrement_loan(request.isbn)
         return library_pb2.ReturnResponse(ok=True, message="Devolución registrada")
 
+# arranque del servidor gRPC
 def serve():
-    dao = BookDao("library.db")
-    dao.ensure_schema()
+    dao = BookDao("library.db")        # inicializa base de datos
+    dao.ensure_schema()                # crea tablas si no existen
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     library_pb2_grpc.add_LibraryServiceServicer_to_server(LibraryService(dao), server)
-    #server.add_insecure_port("[::]:50051")
-    server.add_insecure_port("0.0.0.0:8080")
+    server.add_insecure_port("0.0.0.0:8080")  # escucha en todas las interfaces, puerto 8080
     server.start()
     print("Servidor gRPC en puerto 8080")
     server.wait_for_termination()
