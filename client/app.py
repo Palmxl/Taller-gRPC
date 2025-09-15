@@ -6,7 +6,7 @@ def main():
     stub = library_pb2_grpc.LibraryServiceStub(channel)
 
     while True:
-        print("\n1) QueryByIsbn  2) LoanByIsbn  3) LoanByTitle  4) ReturnByIsbn  0) Salir")
+        print("\n1) Consulta ISBN  2) Prestamo ISBN  3) Prestamo Titulo  4) Devolucion ISBN  0) Salir") 
         op = input("> ").strip()
         try:
             if op == "1":
